@@ -1,0 +1,30 @@
+package com.trustlayer.notification.infrastructure;
+
+import com.trustlayer.notification.domain.EmailProvider;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.stereotype.Component;
+
+@Component
+@ConditionalOnProperty(name = "trustlayer.notification.email-provider", havingValue = "smtp")
+class SmtpEmailProvider implements EmailProvider {
+
+    private final JavaMailSender mailSender;
+    private final NotificationProperties properties;
+
+    SmtpEmailProvider(JavaMailSender mailSender, NotificationProperties properties) {
+        this.mailSender = mailSender;
+        this.properties = properties;
+    }
+
+    @Override
+    public void send(String to, String subject, String body) {
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setFrom(properties.mailFrom());
+        message.setTo(to);
+        message.setSubject(subject);
+        message.setText(body);
+        mailSender.send(message);
+    }
+}
